@@ -79,20 +79,23 @@ def vh2vb (vhvec, mu, Gmass):
     #vhvec: heliocentric velocity vectors of all n bodies
     #Gmass: masses of n bodies in system
     #vb: barycentric velocity vectors of n bodies
-    #GMcb: central body gravitational parameter
+    #mu: central body gravitational parameter
     #vbcv: barycentric velocity vector of central body
     return vbvec, vbcb
 
-def vb2vh (vbvec, mu, Gmass)
+def vb2vh (vbvec, mu, Gmass):
     Gmtot= mu + np.sum(Gmass)
     vbcb = -np.sum(Gmass * vbvec, axis=0)/ mu
     vhvec= vbvec - vbcb
     # vhvec: heliocentric velocity vectors of all n bodies
     # Gmass: masses of n bodies in system
     # vb: barycentric velocity vectors of n bodies
-    # GMcb: central body gravitational parameter
+    # mu: central body gravitational parameter
     # vbcv: barycentric velocity vector of central body
     return vhvec
+
+
+
 def Kep_drift (,dt):
     #Uses Kepler's equation for eccentric anomaly E
 
@@ -147,7 +150,7 @@ def Kep_drift (,dt):
     g=dt+1.0/n*(np.sin(dE)-dE)
 
     r_mag=f*r_mag0+g*v_mag0
-
+    return r_mag
     #Define fdot and gdot for vmag using eq 2.71 on pg 37
 def kick ():
     #E_int step
@@ -169,3 +172,26 @@ def drift_one(mu,x,y,z,vx,vy,vz,dt):
     #inputs cartesian coordinates
 
     #Outputs new position and velocity cartesian coordinates
+
+    def calc_energy_one(vhvec, rhvec, Gmass, mu):
+        # Computes system energy at particular state of simulation
+        # rhvec: heliocentric position vectors of n bodies
+        # vhvec: heliocentric velocity vectors of n bodies
+        # Gmass: masses of n bodies in system
+        # mu: central body gravitational parameter
+        # vbvec,vbcb: from vh2vb
+        vbmag2 = np.einsum("ij,ij->i", vbvec, vbvec)
+        irh = 1.0 / np.linalg.norm(rhvec, axis=1)
+        ke = 0.5 * (mu * np.vdot(vbcb, vbcb) + np.sum(Gmass * vbmag2)) / GC
+
+        def pe_one(Gm, rvec, i):
+            drvec = r_vec[i + 1:, :] - rvec[i, :]
+            irij = np.linalg.norm(drvec, axis=1)
+            irij = Gm[i + 1:] * Gm[i] / irij
+            return np.sum(drvec.T * irij, axis=1)
+
+        n = rhvec.shape[0]
+        pe = (-mu * np.sum(Gmass * irh) - np.sum([pe_one(Gmass.flatten(), rhvec, i) for i in range(n - 1)])) / GC
+
+        return ke + pe
+
