@@ -3,16 +3,17 @@ from orbitgeometry import *
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-from matplotlib import rc
-import xarray as xr
+from matplotlib im
+import astropy as astro
+
 
 #Initial Conditions
+
+#Global constants in SI units
 G= 6.6743E-11
 m_Sun=1.9885E+30
 mu= -G*(m_Sun)
-
-#Global constants in SI units
-
+Gmass=(m_Neptune + m_Pluto)
 
 JD2S=86400
 YR2S=np.longdouble(365.25*JD2S)
@@ -70,19 +71,28 @@ def xv2el (mu,x,y,z,vx,vy,vz):
 #Use equations from sxn 2.8 pg 52 and 53
     return a,ecc,I,omega,peri,f
 
-def vh2vb (vhvec, mass):
+def vh2vb (vhvec, mu, Gmass):
     #Converts heliocentric velocity vector to barycentric
-    cm=(m_Neptune*r_Neptune+m_Pluto*r_Pluto+m_Sun*r_Sun)/mass
-    self.vbcb = -np.sum(self.Gmass*self.vhvec, axis=0)/self.Gmtot
-    self.vbvec= self.vhvec + self.vbcb
-    #vh: heliocentric velocity vectors of all n bodies
-    #mass: masses of n bodies in system
+    Gmtot= mu + np.sum(Gmass)
+    vbcb = -np.sum(Gmass* vhvec,axis=0)/Gmtot
+    vbvec= vhvec + vbcb
+    #vhvec: heliocentric velocity vectors of all n bodies
+    #Gmass: masses of n bodies in system
     #vb: barycentric velocity vectors of n bodies
+    #GMcb: central body gravitational parameter
+    #vbcv: barycentric velocity vector of central body
+    return vbvec, vbcb
 
-    return vb
-
-def vb2vh (vbvec, mass)
-    
+def vb2vh (vbvec, mu, Gmass)
+    Gmtot= mu + np.sum(Gmass)
+    vbcb = -np.sum(Gmass * vbvec, axis=0)/ mu
+    vhvec= vbvec - vbcb
+    # vhvec: heliocentric velocity vectors of all n bodies
+    # Gmass: masses of n bodies in system
+    # vb: barycentric velocity vectors of n bodies
+    # GMcb: central body gravitational parameter
+    # vbcv: barycentric velocity vector of central body
+    return vhvec
 def Kep_drift (,dt):
     #Uses Kepler's equation for eccentric anomaly E
 
