@@ -36,6 +36,7 @@ vy_Pluto= 3.621999156857085E-01
 vz_Pluto= 1.046185526637238E+00
 
 
+
 def xv2el (mu,x,y,z,vx,vy,vz):
 #input position and velocity vectors in cartesian coordinates
     r_vec=np.array([x,y,z])
@@ -96,25 +97,25 @@ def vb2vh (vbvec, mu, Gmass):
 
 
 
-def Kep_drift (,dt):
+def Kep_drift (rvec0,vvec0,mu,dt):
     #Uses Kepler's equation for eccentric anomaly E
 
     E = [M]
     e=ecc
     # Equation 2.49 solve for E
-    def Danby(M,ecc):
+    def Danby(M,ecc,accuracy=1E-14):
 
         def f(E):
-            return E - e * np.sin(E) - M
+            return E - ecc * np.sin(E) - M
 
         def fP(E):
-            return 1 - e * np.cos(E)
+            return 1 - ecc * np.cos(E)
 
         def fP2(E):
-            return e * np.sin(E)
+            return ecc * np.sin(E)
 
         def fP3(E):
-            return e * np.cos(E)
+            return ecc * np.cos(E)
 
         def D1(E):
             return -(f(E)) / (fP(E))
@@ -132,25 +133,40 @@ def Kep_drift (,dt):
                 break
     #utilizes f and g functions
     #Danby method
-    if ecc < np.finfo(np.float64).tiny:
+    r_mag0=np.linalg.norm(r_vec0)
+    v_mag2=np.vdot(v_vec0,v_vec0)
+    h= np.cross(r_vec0, v_vec0)
+    h_mag2= npv.vdot(h,h)
+    a = 1.0/(2.0/ r_mag0-v_mag2/mu)
+    ecc= np.sqrt(1-h_mag2 / (mu*a))
+
+    n= np.swrt(mu / a**3)
+    E0 = np.where(ecc > np.finfo(np.float64).tiny, np.arccos(-(r_mag0 - a) / (a * ecc)), 0)
+
+    if ecc < np.finfo(np.float64).tiny: #Uses M as E in 0 ecc orbits
         E0=0.0
     else:
-        E0=np.arccos(-(rmag0-a)/(a*ecc))
+        E0=np.arccos(-(r_mag0-a)/(a*ecc))
 
-    if np.sign(np.vdot(r0,v0))<0.0
+    if np.sign(np.vdot(r_vec0,v_vec0))<0.0:
         E0= 2*np.pi-E0
 
     M0=E0-ecc*np.sin(E0)
 
     M-M0+n*dt
     E=danby(M,ecc)
+    dE= E - E0
 
-
-    f=a/rmag0*(np.cos(dE)-1.0)+1.0
+    f=a/r_mag0*(np.cos(dE)-1.0)+1.0
     g=dt+1.0/n*(np.sin(dE)-dE)
 
-    r_mag=f*r_mag0+g*v_mag0
-    return r_mag
+    r_vec=f * r_vec0 + g*v_vec0
+    r_mag= np.linalg.norm(r_vec)
+    fdot = -a**2 / (r_mag*r_mag0) *n * np.sin(dE)
+    gdot= a/r_mag* (np.cos(dE)-1.0)+1.0
+
+    v_vec= fdot* r_vec0 +gdot* v_vec0
+    return r_vec, v_vec
     #Define fdot and gdot for vmag using eq 2.71 on pg 37
 def kick ():
     #E_int step
