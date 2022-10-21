@@ -172,18 +172,37 @@ def kick ():
     #E_int step
     #uses the Hamiltonian for the interaction step
     #half-time step (solar drift/linear drift)
+    def getacc_one(GM, rvec, i):
+        #Gm: G*mass values of each body
+        #rvec: cartesian position vectors
+        #i: indec of body to return the accelerations
 
+    #acc: accelerations acting on body i due to all other bodies
+        drvec= rvec - rvec[i, :]
+        irij3= np.linalg.norm(drvec, axis=1)**3
+        irij3[i]= 1
+        irij3= Gm / irij3
 
-def Sun_drift(self,dt):
+        return np.sum(drvec.T * irij3, axis=1)
+
+    n= self.rhvec.shape[0]
+    acc = np.array([getacc_one(Gmass.flatten(), rhvec, i)for i in range(n)])
+    vbvec += acc * dt
+    return
+def Sun_drift(,dt):
     #updates barycenter of Sun
-    pt = np.sum(self.Gmass * self.vbvec, axis=0) / self.param['GMcb']
-    self.rhvec += pt*dt
+    pt = np.sum(Gmass *vbvec, axis=0) / param['GMcb']
+    rhvec += pt*dt
 
 def step(dt):
     #Advances simulation by dt
-
+    #Use dt as 5
     dth=0.5*dt
-
+    Sun_drift(dth)
+    kick(dth)
+    Kep_drift(rvec0,vvec0,mu,dt)
+    kick(dth)
+    Sun_drift(dth)
 def drift_one(mu,x,y,z,vx,vy,vz,dt):
     #inputs cartesian coordinates
 
@@ -211,3 +230,14 @@ def drift_one(mu,x,y,z,vx,vy,vz,dt):
 
         return ke + pe
 
+
+#Make plots
+fig, ax = plt.subplots(figsize=(8,6))
+    sim.data['phi'].plot(x="time",ax=ax)
+    plt.savefig(os.path.join(os.pardir,"plots","resonance_angle.png"),dpi=300)
+    plt.close()
+
+    fig, ax = plt.subplots(figsize=(8,6))
+    sim.data['dE/E0'].plot(x="time",ax=ax)
+    plt.savefig(os.path.join(os.pardir,"plots","energy.png"),dpi=300)
+    plt.close()
