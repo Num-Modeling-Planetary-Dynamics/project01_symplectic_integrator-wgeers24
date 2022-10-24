@@ -1,5 +1,5 @@
-%matplotlib inline
-from orbitgeometry import *
+
+import orbitgeometry as orb
 import numpy as np
 import os
 import matplotlib.pyplot as plt
@@ -13,12 +13,14 @@ import astropy as astro
 G= 6.6743E-11
 m_Sun=1.9885E+30
 mu= -G*(m_Sun)
+m_Neptune= 102.409E+24
+m_Pluto= 1.307E+22
 Gmass=(m_Neptune + m_Pluto)
 GMcb= -G*(m_Sun)
 JD2S=86400
 YR2S=np.longdouble(365.25*JD2S)
 #Neptune Initial Conditions
-m_Neptune= 102.409E+24
+
 x_Neptune=2.266223889656152E+08
 y_Neptune=4.461841849742382E+09
 z_Neptune=-9.710614902790475E+07
@@ -27,7 +29,7 @@ vy_Neptune= 3.044797889906726E-01
 vz_Neptune= 1.187834180290304E-01
 
 #Pluto Initial Conditions
-m_Pluto= 1.307E+22
+
 x_Pluto= 1.540431633806554E+09
 y_Pluto= 6.753704837972438E+09
 z_Pluto=-1.168941164341141E+09
