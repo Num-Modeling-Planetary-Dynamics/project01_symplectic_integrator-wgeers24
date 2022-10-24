@@ -14,7 +14,7 @@ G= 6.6743E-11
 m_Sun=1.9885E+30
 mu= -G*(m_Sun)
 Gmass=(m_Neptune + m_Pluto)
-
+GMcb= -G*(m_Sun)
 JD2S=86400
 YR2S=np.longdouble(365.25*JD2S)
 #Neptune Initial Conditions
@@ -154,7 +154,7 @@ def Kep_drift (rvec0,vvec0,mu,dt):
     M0=E0-ecc*np.sin(E0)
 
     M-M0+n*dt
-    E=danby(M,ecc)
+    E=Danby(M,ecc)
     dE= E - E0
 
     f=a/r_mag0*(np.cos(dE)-1.0)+1.0
