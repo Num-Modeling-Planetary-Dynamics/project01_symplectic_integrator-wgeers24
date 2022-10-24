@@ -45,7 +45,7 @@ def xv2el (mu,x,y,z,vx,vy,vz):
     r_mag=np.linalg.norm(r_vec)
     v_vec=np.array([vx,vy,vz])
     v_mag=np.linalg.norm(v_vec)
-    h_vec=np.cross(r,v)
+    h_vec=np.cross(r_vec,v_vec)
     h_mag=np.linalg.norm(h_vec)
     r_r_dot=np.vdot(r_vec,v_vec)
     r_dot=np.sign(r_r_dot)*np.sqrt((v_mag**2)-(h_mag**2/r_mag**2))
@@ -53,10 +53,10 @@ def xv2el (mu,x,y,z,vx,vy,vz):
 
     a=((2/r_mag)-(v_mag**2/mu))**-1
     ecc=np.sqrt(1-(h_mag**2/(mu*a)))
-    I=np.arccos(hz/h_mag)
+    I=np.arccos(h_vec[2]/h_mag)
 
-    sO=(np.sign(h[2])*h[0]/(h_mag*np.sin(I)))
-    cO=(np.sign(h[2])*h[1])/(h_mag*np.sin(I)))
+    sO=(np.sign(h_vec[2])*h_vec[0]/(h_mag*np.sin(I)))
+    cO=(np.sign(h_vec[2])*h_vec[1])/(h_mag*np.sin(I)))
     omega=np.arctan2(sO,cO)
 
     sof=z/(r_mag*np.sin(I))
