@@ -187,11 +187,11 @@ def kick ():
 
         return np.sum(drvec.T * irij3, axis=1)
 
-    n= self.rhvec.shape[0]
+    n= rhvec.shape[0]
     acc = np.array([getacc_one(Gmass.flatten(), rhvec, i)for i in range(n)])
     vbvec += acc * dt
     return
-def Sun_drift(,dt):
+def Sun_drift(Gmass,vbvec,dt):
     #updates barycenter of Sun
     pt = np.sum(Gmass *vbvec, axis=0) / param['GMcb']
     rhvec += pt*dt
@@ -200,7 +200,7 @@ def step(dt):
     #Advances simulation by dt
     #Use dt as 5
     dth=0.5*dt
-    Sun_drift(dth)
+    Sun_drift(Gmass,dth)
     kick(dth)
     Kep_drift(rvec0,vvec0,mu,dt)
     kick(dth)
@@ -243,3 +243,5 @@ fig, ax = plt.subplots(figsize=(8,6))
     sim.data['dE/E0'].plot(x="time",ax=ax)
     plt.savefig(os.path.join(os.pardir,"plots","energy.png"),dpi=300)
     plt.close()
+
+def main():
