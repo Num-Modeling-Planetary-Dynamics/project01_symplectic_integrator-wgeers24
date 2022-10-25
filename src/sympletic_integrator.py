@@ -1,10 +1,8 @@
 
-import orbitgeometry as orb
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-from matplotlib im
-import astropy as astro
+
 
 
 #Initial Conditions
@@ -19,6 +17,7 @@ Gmass=(m_Neptune + m_Pluto)
 GMcb= -G*(m_Sun)
 JD2S=86400
 YR2S=np.longdouble(365.25*JD2S)
+dt=5.5*JD2S
 #Neptune Initial Conditions
 
 x_Neptune=2.266223889656152E+08
@@ -56,7 +55,7 @@ def xv2el (mu,x,y,z,vx,vy,vz):
     I=np.arccos(h_vec[2]/h_mag)
 
     sO=(np.sign(h_vec[2])*h_vec[0]/(h_mag*np.sin(I)))
-    cO=(np.sign(h_vec[2])*h_vec[1])/(h_mag*np.sin(I)))
+    cO=(np.sign(h_vec[2])*h_vec[1])/(h_mag*np.sin(I))
     omega=np.arctan2(sO,cO)
 
     sof=z/(r_mag*np.sin(I))
@@ -64,7 +63,7 @@ def xv2el (mu,x,y,z,vx,vy,vz):
     pf=np.arctan2(sof,cof)
 
     sf=((a*(1-ecc**2))/(h_mag*ecc))*(r_dot)
-    cf=(1/ecc)*((a*(1-e**2)/r_mag)-1)
+    cf=(1/ecc)*((a*(1-ecc**2)/r_mag)-1)
     f=np.arctan2(sf,cf)
     peri=pf-f
 
@@ -87,7 +86,6 @@ def vh2vb (vhvec, mu, Gmass):
     return vbvec, vbcb
 
 def vb2vh (vbvec, mu, Gmass):
-    Gmtot= mu + np.sum(Gmass)
     vbcb = -np.sum(Gmass * vbvec, axis=0)/ mu
     vhvec= vbvec - vbcb
     # vhvec: heliocentric velocity vectors of all n bodies
@@ -99,11 +97,8 @@ def vb2vh (vbvec, mu, Gmass):
 
 
 
-def Kep_drift (rvec0,vvec0,mu,dt):
+def Kep_drift (M,r_vec0,v_vec0,mu,dt):
     #Uses Kepler's equation for eccentric anomaly E
-
-    E = [M]
-    e=ecc
     # Equation 2.49 solve for E
     def Danby(M,ecc,accuracy=1E-14):
 
@@ -137,8 +132,8 @@ def Kep_drift (rvec0,vvec0,mu,dt):
     #Danby method
     r_mag0=np.linalg.norm(r_vec0)
     v_mag2=np.vdot(v_vec0,v_vec0)
-    h= np.cross(r_vec0, v_vec0)
-    h_mag2= npv.vdot(h,h)
+    h_vec0= np.cross(r_vec0, v_vec0)
+    h_mag2= np.vdot(h_vec0,h_vec0)
     a = 1.0/(2.0/ r_mag0-v_mag2/mu)
     ecc= np.sqrt(1-h_mag2 / (mu*a))
 
@@ -174,7 +169,7 @@ def kick ():
     #E_int step
     #uses the Hamiltonian for the interaction step
     #half-time step (solar drift/linear drift)
-    def getacc_one(GM, rvec, i):
+    def getacc_one(Gm, rvec, i):
         #Gm: G*mass values of each body
         #rvec: cartesian position vectors
         #i: indec of body to return the accelerations
@@ -217,30 +212,31 @@ def drift_one(mu,x,y,z,vx,vy,vz,dt):
         # Gmass: masses of n bodies in system
         # mu: central body gravitational parameter
         # vbvec,vbcb: from vh2vb
+        vbvec,vbcb= vh2vb(vhvec, mu, Gmass)
         vbmag2 = np.einsum("ij,ij->i", vbvec, vbvec)
         irh = 1.0 / np.linalg.norm(rhvec, axis=1)
-        ke = 0.5 * (mu * np.vdot(vbcb, vbcb) + np.sum(Gmass * vbmag2)) / GC
+        ke = 0.5 * (mu * np.vdot(vbcb, vbcb) + np.sum(Gmass * vbmag2)) / G
 
-        def pe_one(Gm, rvec, i):
-            drvec = r_vec[i + 1:, :] - rvec[i, :]
+        def pe_one(Gm, r_vec, i):
+            drvec = r_vec[i + 1:, :] - r_vec[i, :]
             irij = np.linalg.norm(drvec, axis=1)
             irij = Gm[i + 1:] * Gm[i] / irij
             return np.sum(drvec.T * irij, axis=1)
 
         n = rhvec.shape[0]
-        pe = (-mu * np.sum(Gmass * irh) - np.sum([pe_one(Gmass.flatten(), rhvec, i) for i in range(n - 1)])) / GC
+        pe = (-mu * np.sum(Gmass * irh) - np.sum([pe_one(Gmass.flatten(), rhvec, i) for i in range(n - 1)])) / G
 
         return ke + pe
 
 
 #Make plots
 fig, ax = plt.subplots(figsize=(8,6))
-    sim.data['phi'].plot(x="time",ax=ax)
+    data['phi'].plot(x="time",ax=ax)
     plt.savefig(os.path.join(os.pardir,"plots","resonance_angle.png"),dpi=300)
     plt.close()
 
     fig, ax = plt.subplots(figsize=(8,6))
-    sim.data['dE/E0'].plot(x="time",ax=ax)
+    data['dE/E0'].plot(x="time",ax=ax)
     plt.savefig(os.path.join(os.pardir,"plots","energy.png"),dpi=300)
     plt.close()
 
