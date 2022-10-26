@@ -18,7 +18,7 @@ GMcb= -G*(m_Sun)
 JD2S=86400
 YR2S=np.longdouble(365.25*JD2S)
 dt=5.5*JD2S
-#Neptune Initial Conditions
+#Neptune Initial Conditions SI
 
 x_Neptune=2.266223889656152E+08
 y_Neptune=4.461841849742382E+09
@@ -27,7 +27,7 @@ vx_Neptune=-5.447617894349518E+00
 vy_Neptune= 3.044797889906726E-01
 vz_Neptune= 1.187834180290304E-01
 
-#Pluto Initial Conditions
+#Pluto Initial Conditions SI
 
 x_Pluto= 1.540431633806554E+09
 y_Pluto= 6.753704837972438E+09
@@ -186,9 +186,9 @@ def kick (rhvec, vbvec):
     acc = np.array([getacc_one(Gmass.flatten(), rhvec, i)for i in range(n)])
     vbvec += acc * dt
     return
-def Sun_drift(Gmass,rhvec,vbvec,dt):
+def Sun_drift(Gmass,rhvec,vbvec,GMcb,dt):
     #updates barycenter of Sun
-    pt = np.sum(Gmass *vbvec, axis=0) / param['GMcb']
+    pt = np.sum(Gmass *vbvec, axis=0) / GMcb
     rhvec += pt*dt
 
 def step(rvec0,vvec0,mu,Gmass,dt):
@@ -229,15 +229,16 @@ def drift_one(mu,x,y,z,vx,vy,vz,dt):
         return ke + pe
 
 
-#Make plots
-fig, ax = plt.subplots(figsize=(8,6))
-    data['phi'].plot(x="time",ax=ax)
-    plt.savefig(os.path.join(os.pardir,"plots","resonance_angle.png"),dpi=300)
-    plt.close()
+#Make plots from help, make own using matplotlib
+#fig, ax = plt.subplots(figsize=(8,6))
+#data['phi'].plot(x="time",ax=ax)
+#plt.savefig(os.path.join(os.pardir,"plots","resonance_angle.png"),dpi=300)
+#plt.close()
 
-    fig, ax = plt.subplots(figsize=(8,6))
-    data['dE/E0'].plot(x="time",ax=ax)
-    plt.savefig(os.path.join(os.pardir,"plots","energy.png"),dpi=300)
-    plt.close()
+#fig, ax = plt.subplots(figsize=(8,6))
+#data['dE/E0'].plot(x="time",ax=ax)
+#plt.savefig(os.path.join(os.pardir,"plots","energy.png"),dpi=300)
+#plt.close()
 
 def main():
+
