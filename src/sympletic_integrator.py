@@ -10,11 +10,12 @@ import matplotlib.pyplot as plt
 #Global constants in SI units
 G= 6.6743E-11
 m_Sun=1.9885E+30
-mu= -G*(m_Sun)
+mu= -G*m_Sun
 m_Neptune= 102.409E+24
 m_Pluto= 1.307E+22
-Gmass=(m_Neptune + m_Pluto)
-GMcb= -G*(m_Sun)
+Gmass=m_Neptune + m_Pluto
+Gm= Gmass*G
+GMcb= -G*m_Sun
 JD2S=86400
 YR2S=np.longdouble(365.25*JD2S)
 dt=5.5*YR2S
@@ -165,7 +166,7 @@ def Kep_drift (M,r_vec0,v_vec0,mu,dt):
     v_vec= fdot* r_vec0 +gdot* v_vec0
     return r_vec, v_vec
     #Define fdot and gdot for vmag using eq 2.71 on pg 37
-def kick (rhvec, vbvec):
+def kick (rhvec, vbvec, dt):
     #E_int step
     #uses the Hamiltonian for the interaction step
     #half-time step (solar drift/linear drift)
@@ -183,7 +184,7 @@ def kick (rhvec, vbvec):
         return np.sum(dr_vec.T * irij3, axis=1)
 
     n= rhvec.shape[0]
-    acc = np.array([getacc_one(Gmass.flatten(), rhvec, i)for i in range(n)])
+    acc = np.array([getacc_one(Gmass, rhvec, i)for i in range(n)])
     vbvec += acc * dt
     return
 def Sun_drift(Gmass,rhvec,vbvec,GMcb,dt):
@@ -200,7 +201,7 @@ def step(rvec0,vvec0,mu,Gmass,dt):
     Kep_drift(rvec0,vvec0,mu,dt)
     kick(dth)
     Sun_drift(dth)
-def drift_one(mu,x,y,z,vx,vy,vz,dt):
+def drift_one(mu,x,y,z,vx,vy,vz,dth):
     #inputs cartesian coordinates
 
     #Outputs new position and velocity cartesian coordinates
