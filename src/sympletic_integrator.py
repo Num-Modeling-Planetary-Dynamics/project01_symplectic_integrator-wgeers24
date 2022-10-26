@@ -138,7 +138,7 @@ def Kep_drift (M,r_vec0,v_vec0,mu,dt):
     a = 1.0/(2.0/ r_mag0-v_mag2/mu)
     ecc= np.sqrt(1-h_mag2 / (mu*a))
 
-    n= np.swrt(mu / a**3)
+    n= np.sqrt(mu / a**3)
     E0 = np.where(ecc > np.finfo(np.float64).tiny, np.arccos(-(r_mag0 - a) / (a * ecc)), 0)
 
     if ecc < np.finfo(np.float64).tiny: #Uses M as E in 0 ecc orbits
@@ -241,4 +241,9 @@ def drift_one(mu,x,y,z,vx,vy,vz,dth):
 #plt.savefig(os.path.join(os.pardir,"plots","energy.png"),dpi=300)
 #plt.close()
 
-def main():
+if __name__=="__main__":
+
+
+
+
+
