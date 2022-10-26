@@ -165,33 +165,33 @@ def Kep_drift (M,r_vec0,v_vec0,mu,dt):
     v_vec= fdot* r_vec0 +gdot* v_vec0
     return r_vec, v_vec
     #Define fdot and gdot for vmag using eq 2.71 on pg 37
-def kick ():
+def kick (rhvec, vbvec):
     #E_int step
     #uses the Hamiltonian for the interaction step
     #half-time step (solar drift/linear drift)
-    def getacc_one(Gm, rvec, i):
+    def getacc_one(Gm, r_vec, i):
         #Gm: G*mass values of each body
         #rvec: cartesian position vectors
         #i: indec of body to return the accelerations
 
     #acc: accelerations acting on body i due to all other bodies
-        drvec= rvec - rvec[i, :]
-        irij3= np.linalg.norm(drvec, axis=1)**3
+        dr_vec= r_vec - r_vec[i, :]
+        irij3= np.linalg.norm(dr_vec, axis=1)**3
         irij3[i]= 1
         irij3= Gm / irij3
 
-        return np.sum(drvec.T * irij3, axis=1)
+        return np.sum(dr_vec.T * irij3, axis=1)
 
     n= rhvec.shape[0]
     acc = np.array([getacc_one(Gmass.flatten(), rhvec, i)for i in range(n)])
     vbvec += acc * dt
     return
-def Sun_drift(Gmass,vbvec,dt):
+def Sun_drift(Gmass,rhvec,vbvec,dt):
     #updates barycenter of Sun
     pt = np.sum(Gmass *vbvec, axis=0) / param['GMcb']
     rhvec += pt*dt
 
-def step(dt):
+def step(rvec0,vvec0,mu,Gmass,dt):
     #Advances simulation by dt
     #Use dt as 5
     dth=0.5*dt
