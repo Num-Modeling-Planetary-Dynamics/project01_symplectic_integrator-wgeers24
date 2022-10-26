@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 
-#Initial Conditions
+#Initial Conditions 01/01/1900-01/01/2099
 
 #Global constants in SI units
 G= 6.6743E-11
@@ -17,7 +17,7 @@ Gmass=(m_Neptune + m_Pluto)
 GMcb= -G*(m_Sun)
 JD2S=86400
 YR2S=np.longdouble(365.25*JD2S)
-dt=5.5*JD2S
+dt=5.5*YR2S
 #Neptune Initial Conditions SI
 
 x_Neptune=2.266223889656152E+08
@@ -101,7 +101,7 @@ def Kep_drift (M,r_vec0,v_vec0,mu,dt):
     #Uses Kepler's equation for eccentric anomaly E
     # Equation 2.49 solve for E
     def Danby(M,ecc,accuracy=1E-14):
-
+        E=[M]
         def f(E):
             return E - ecc * np.sin(E) - M
 
@@ -241,4 +241,3 @@ def drift_one(mu,x,y,z,vx,vy,vz,dt):
 #plt.close()
 
 def main():
-
