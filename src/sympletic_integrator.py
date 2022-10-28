@@ -237,14 +237,30 @@ def drift_one(mu,x,y,z,vx,vy,vz,dth):
 #plt.savefig(os.path.join(os.pardir,"plots","resonance_angle.png"),dpi=300)
 #plt.close()
 
+
 #fig, ax = plt.subplots(figsize=(8,6))
 #data['dE/E0'].plot(x="time",ax=ax)
 #plt.savefig(os.path.join(os.pardir,"plots","energy.png"),dpi=300)
 #plt.close()
 
 #Plot of total change in system energy
-
+plt.subplots(figsize=(8,6))
+y_values=dE/E0
+x_values=[time]
+plt.plot(x_values,y_values)
+plt.ylabel('Change in Energy')
+plt.xlabel('Time (Year)')
+plt.title('Change in Energy of System')
+plt.savefig('Delta_Energy.pdf')
 #Plot of resonance angle vs time
+plt.subplots(figsize=(8,6))
+y_values=res_angle
+x_values=[time]
+plt.plot(x_values, y_values)
+plt.ylabel('Resonance angle')
+plt.xlabel('Time')
+plt.title('Change in Resonance angle over time')
+plt.savefig('Delta_Res.pdf')
 
 if __name__=="__main__":
 
