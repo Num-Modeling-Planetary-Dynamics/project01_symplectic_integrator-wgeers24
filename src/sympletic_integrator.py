@@ -244,26 +244,31 @@ def drift_one(mu,x,y,z,vx,vy,vz,dth):
 #plt.close()
 
 #Plot of total change in system energy
-plt.subplots(figsize=(8,6))
-y_values=dE/E0
-x_values=[time]
-plt.plot(x_values,y_values)
-plt.ylabel('Change in Energy')
-plt.xlabel('Time (Year)')
-plt.title('Change in Energy of System')
-plt.savefig('Delta_Energy.pdf')
-#Plot of resonance angle vs time
-plt.subplots(figsize=(8,6))
-y_values=res_angle
-x_values=[time]
-plt.plot(x_values, y_values)
-plt.ylabel('Resonance angle')
-plt.xlabel('Time')
-plt.title('Change in Resonance angle over time')
-plt.savefig('Delta_Res.pdf')
+
 
 if __name__=="__main__":
+    time=[]
+    dt = 5.5 * YR2S
+    xv2el(x_Neptune, y_Neptune, z_Neptune, vx_Neptune,vy_Neptune, vz_Neptune)
 
+    step(rvec0, vvec0, mu, Gmass, dt)
+    plt.subplots(figsize=(8, 6))
+    y_values = dE / E0
+    x_values = [time]
+    plt.plot(x_values, y_values)
+    plt.ylabel('Change in Energy')
+    plt.xlabel('Time (Year)')
+    plt.title('Change in Energy of System')
+    plt.savefig('Delta_Energy.pdf')
+    # Plot of resonance angle vs time
+    plt.subplots(figsize=(8, 6))
+    y_values = res_angle
+    x_values = [time]
+    plt.plot(x_values, y_values)
+    plt.ylabel('Resonance angle')
+    plt.xlabel('Time')
+    plt.title('Change in Resonance angle over time')
+    plt.savefig('Delta_Res.pdf')
 
 
 
