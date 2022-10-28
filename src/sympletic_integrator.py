@@ -131,6 +131,7 @@ def Kep_drift (M,r_vec0,v_vec0,mu,dt):
                 break
     #utilizes f and g functions
     #Danby method
+    #Updates semi-major axis and eccentricity
     r_mag0=np.linalg.norm(r_vec0)
     v_mag2=np.vdot(v_vec0,v_vec0)
     h_vec0= np.cross(r_vec0, v_vec0)
