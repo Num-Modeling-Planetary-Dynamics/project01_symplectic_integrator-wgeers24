@@ -242,6 +242,10 @@ def drift_one(mu,x,y,z,vx,vy,vz,dth):
 #plt.savefig(os.path.join(os.pardir,"plots","energy.png"),dpi=300)
 #plt.close()
 
+#Plot of total change in system energy
+
+#Plot of resonance angle vs time
+
 if __name__=="__main__":
 
 
