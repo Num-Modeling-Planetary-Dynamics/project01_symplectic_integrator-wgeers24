@@ -31,14 +31,14 @@ hvals = step_vals * P
 sim_results_all = []
 conserved_results_all = []
 for h in hvals:
-y = y0
-tvals = np.arange(start=t0, stop=tend+h, step=h)
-itheta = np.ceil(P/h).astype(np.int64)
-Energy_vals = []
-delta_theta_vals = []
-h_vals = []
-yhist = []
-thist = []
+    y = y0
+    tvals = np.arange(start=t0, stop=tend+h, step=h)
+    itheta = np.ceil(P/h).astype(np.int64)
+    Energy_vals = []
+    delta_theta_vals = []
+    h_vals = []
+    yhist = []
+    thist = []
 
 for i,t in enumerate(tvals):
     yhist.append(y)
