@@ -50,29 +50,29 @@ def xv2el (mu,x,y,z,vx,vy,vz):
     r_r_dot=np.vdot(r_vec,v_vec)
     r_dot=np.sign(r_r_dot)*np.sqrt((v_mag**2)-(h_mag**2/r_mag**2))
 
+    a = ((2 / r_mag) - (v_mag ** 2 / mu)) ** -1
+    ecc = np.sqrt(1 - (h_mag ** 2 / (mu * a)))
+    inc = np.arccos(h_vec[2] / h_mag)
 
-    a=((2/r_mag)-(v_mag**2/mu))**-1
-    ecc=np.sqrt(1-(h_mag**2/(mu*a)))
-    I=np.arccos(h_vec[2]/h_mag)
+    sO = (np.sign(h_vec[2]) * h_vec[0] / (h_mag * np.sin(inc)))
+    cO = (np.sign(h_vec[2]) * h_vec[1]) / (h_mag * np.sin(inc))
+    Omega = np.arctan2(sO, cO)
 
-    sO=(np.sign(h_vec[2])*h_vec[0]/(h_mag*np.sin(I)))
-    cO=(np.sign(h_vec[2])*h_vec[1])/(h_mag*np.sin(I))
-    omega=np.arctan2(sO,cO)
+    sof = z / (r_mag * np.sin(inc))
+    cof = ((x / r_mag) + np.sin(Omega) * sof * np.cos(inc)) / np.cos(Omega)
+    of = np.arctan2(sof, cof)
 
-    sof=z/(r_mag*np.sin(I))
-    cof=((x/r_mag)+np.sin(omega)*sof*np.cos(I))/np.cos(omega)
-    pf=np.arctan2(sof,cof)
+    sf = ((a * (1 - ecc ** 2)) / (h_mag * ecc)) * (r_dot)
+    cf = (1 / ecc) * ((a * (1 - ecc ** 2) / r_mag) - 1)
 
-    sf=((a*(1-ecc**2))/(h_mag*ecc))*(r_dot)
-    cf=(1/ecc)*((a*(1-ecc**2)/r_mag)-1)
-    f=np.arctan2(sf,cf)
-    peri=pf-f
+    f = np.arctan2(sf, cf)
+    omega = of - f
 
+    omega=np.mod(omega, 2*np.pi)
 
+    varpi= np.mod(Omega+omega, 2*np.pi)
 
-#output orbital elements
-#Use equations from sxn 2.8 pg 52 and 53
-    return a,ecc,I,omega,peri,f
+    return a, ecc, inc, Omega, omega, varpi, f
 
 def vh2vb (vhvec, mu, Gmass):
     #Converts heliocentric velocity vector to barycentric
