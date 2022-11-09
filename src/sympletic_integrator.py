@@ -72,6 +72,12 @@ def xv2el (mu,x,y,z,vx,vy,vz):
 
     varpi= np.mod(Omega+omega, 2*np.pi)
 
+    inc=np.rad2deg(inc)
+    Omega=np.rad2deg(Omega)
+    omega=np.rad2deg(omega)
+    varpi=np.rad2deg(varpi)
+    f= np.rad2deg(f)
+
     return a, ecc, inc, Omega, omega, varpi, f
 
 def vh2vb (vhvec, mu, Gmass):
