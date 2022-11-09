@@ -72,13 +72,22 @@ def xv2el (mu,x,y,z,vx,vy,vz):
 
     varpi= np.mod(Omega+omega, 2*np.pi)
 
+    E= np.where(ecc>np.finfo(np.float64).tiny, np.arccos(-(r_mag-a)/(a*ecc)),0)
+    if np.sign(np.vdot(r_vec, v_vec))>0.0:
+        E=2*np.pi-E
+
+    M=E-ecc*np.sin(E)
+    lam= np.mod(M+varpi, 2*np.pi)
+
     inc=np.rad2deg(inc)
     Omega=np.rad2deg(Omega)
     omega=np.rad2deg(omega)
     varpi=np.rad2deg(varpi)
     f= np.rad2deg(f)
+    M= np.rad2deg(M)
+    lam= np.rad2deg(lam)
 
-    return a, ecc, inc, Omega, omega, varpi, f
+    return a, ecc, inc, Omega, omega, varpi, f, M, lam
 
 def vh2vb (vhvec, mu, Gmass):
     #Converts heliocentric velocity vector to barycentric
@@ -130,48 +139,51 @@ def Kep_drift (M,r_vec0,v_vec0,mu,dt):
         def D3(E):
             return -(f(E)) / (fP(E) + 0.5 * (D2(E) * fP2(E)) + (1 / 6) * ((D2(E) ** 2) * fP3(E)))
 
-        while True:
+        Maxloops=50
+        for i in range(Maxloops):
             Enew = E[-1] + D3(E[-1])
             E.append(Enew)
             if np.abs((E[-1] - E[-2])/E[-2])<accuracy:
-                break
+                return Enew
+
+    r_mag0 = np.linalg.norm(r_vec0)
+    v_mag2 = np.vdot(v_vec0, v_vec0)
+    h_vec0 = np.cross(r_vec0, v_vec0)
+    h_mag2 = np.vdot(h_vec0, h_vec0)
+    a = 1.0 / (2.0 / r_mag0 - v_mag2 / mu)
+    ecc = np.sqrt(1 - h_mag2 / (mu * a))
+
+    n = np.sqrt(mu / a ** 3)
+    E0 = np.where(ecc > np.finfo(np.float64).tiny, np.arccos(-(r_mag0 - a) / (a * ecc)), 0)
+
+    if ecc < np.finfo(np.float64).tiny:  # Uses M as E in 0 ecc orbits
+        E0 = 0.0
+    else:
+        E0 = np.arccos(-(r_mag0 - a) / (a * ecc))
+
+    if np.sign(np.vdot(r_vec0, v_vec0)) < 0.0:
+        E0 = 2 * np.pi - E0
+
+    M0 = E0 - ecc * np.sin(E0)
+
+    M - M0 + n * dt
+    E = Danby(M, ecc)
+    dE = E - E0
+
+    f = a / r_mag0 * (np.cos(dE) - 1.0) + 1.0
+    g = dt + 1.0 / n * (np.sin(dE) - dE)
+
+    r_vec = f * r_vec0 + g * v_vec0
+    r_mag = np.linalg.norm(r_vec)
+    fdot = -a ** 2 / (r_mag * r_mag0) * n * np.sin(dE)
+    gdot = a / r_mag * (np.cos(dE) - 1.0) + 1.0
+
+    v_vec = fdot * r_vec0 + gdot * v_vec0
+    return r_vec, v_vec
     #utilizes f and g functions
     #Danby method
     #Updates semi-major axis and eccentricity
-    r_mag0=np.linalg.norm(r_vec0)
-    v_mag2=np.vdot(v_vec0,v_vec0)
-    h_vec0= np.cross(r_vec0, v_vec0)
-    h_mag2= np.vdot(h_vec0,h_vec0)
-    a = 1.0/(2.0/ r_mag0-v_mag2/mu)
-    ecc= np.sqrt(1-h_mag2 / (mu*a))
 
-    n= np.sqrt(mu / a**3)
-    E0 = np.where(ecc > np.finfo(np.float64).tiny, np.arccos(-(r_mag0 - a) / (a * ecc)), 0)
-
-    if ecc < np.finfo(np.float64).tiny: #Uses M as E in 0 ecc orbits
-        E0=0.0
-    else:
-        E0=np.arccos(-(r_mag0-a)/(a*ecc))
-
-    if np.sign(np.vdot(r_vec0,v_vec0))<0.0:
-        E0= 2*np.pi-E0
-
-    M0=E0-ecc*np.sin(E0)
-
-    M-M0+n*dt
-    E=Danby(M,ecc)
-    dE= E - E0
-
-    f=a/r_mag0*(np.cos(dE)-1.0)+1.0
-    g=dt+1.0/n*(np.sin(dE)-dE)
-
-    r_vec=f * r_vec0 + g*v_vec0
-    r_mag= np.linalg.norm(r_vec)
-    fdot = -a**2 / (r_mag*r_mag0) *n * np.sin(dE)
-    gdot= a/r_mag* (np.cos(dE)-1.0)+1.0
-
-    v_vec= fdot* r_vec0 +gdot* v_vec0
-    return r_vec, v_vec
     #Define fdot and gdot for vmag using eq 2.71 on pg 37
 def kick (rhvec, vbvec, dt):
     #E_int step
@@ -208,7 +220,9 @@ def step(rvec0,vvec0,mu,Gmass,dt):
     Kep_drift(rvec0,vvec0,mu,dt)
     kick(dth)
     Sun_drift(dth)
-def drift_one(mu,x,y,z,vx,vy,vz,dth):
+def drift_one(mu,r_vec0, v_vec0, dt):
+
+
     #inputs cartesian coordinates
 
     #Outputs new position and velocity cartesian coordinates
@@ -256,9 +270,13 @@ if __name__=="__main__":
     time=[]
     dt = 5.5 * YR2S
     xv2el(x_Neptune, y_Neptune, z_Neptune, vx_Neptune,vy_Neptune, vz_Neptune)
-
-    step(rvec0, vvec0, mu, Gmass, dt)
+    r_vec0=
+    v_vec0=
+    step(r_vec0, v_vec0, mu, Gmass, dt)
     plt.subplots(figsize=(8, 6))
+    dE=
+    E0=
+
     y_values = dE / E0
     x_values = [time]
     plt.plot(x_values, y_values)
