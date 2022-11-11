@@ -10,9 +10,10 @@ import matplotlib.pyplot as plt
 #Global constants in SI units
 G= 6.6743E-11
 m_Sun=1.9885E+30
-mu= G*(m_Sun=m_planet)
 m_Neptune= 102.409E+24
 m_Pluto= 1.307E+22
+m_planet=np.array(m_Neptune, m_Pluto)
+mu=G*(m_Sun+m_planet)
 Gmass=m_Neptune + m_Pluto
 Gm= Gmass*G
 GMcb= G*m_Sun
