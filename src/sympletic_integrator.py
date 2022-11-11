@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 #Global constants in SI units
 G= 6.6743E-11
 m_Sun=1.9885E+30
-mu= -G*m_Sun
+mu= G*(m_Sun=m_planet)
 m_Neptune= 102.409E+24
 m_Pluto= 1.307E+22
 Gmass=m_Neptune + m_Pluto
 Gm= Gmass*G
-GMcb= -G*m_Sun
+GMcb= G*m_Sun
 JD2S=86400
 YR2S=np.longdouble(365.25*JD2S)
 dt=5.5*YR2S
@@ -202,10 +202,10 @@ def kick (rhvec, vbvec, dt):
 
         return np.sum(dr_vec.T * irij3, axis=1)
 
-    n= rhvec.shape[0]
+    n= rhvec.shape[]
     acc = np.array([getacc_one(Gmass, rhvec, i)for i in range(n)])
     vbvec += acc * dt
-    return
+    return vbvec
 def Sun_drift(Gmass,rhvec,vbvec,GMcb,dt):
     #updates barycenter of Sun
     pt = np.sum(Gmass *vbvec, axis=0) / GMcb
@@ -215,11 +215,12 @@ def step(rvec0,vvec0,mu,Gmass,dt):
     #Advances simulation by dt
     #Use dt as 5
     dth=0.5*dt
-    Sun_drift(Gmass,dth)
-    kick(dth)
-    Kep_drift(rvec0,vvec0,mu,dt)
-    kick(dth)
-    Sun_drift(dth)
+    rvec, vvec= Sun_drift(Gmass, rhvec, vbvec, GMcb,dth)
+    vvec = kick(rhvec, vbvec, dth)
+    rvec, vvec= Kep_drift(M,rvec0,vvec0,mu,dt)
+    vvec= kick(rhvec, vbvec, dth)
+    rvec, vvec= Sun_drift(Gmass, rhvec, vbvec, GMcb, dth)
+    return rvec, vvec
 def drift_one(mu,r_vec0, v_vec0, dt):
 
 
@@ -256,6 +257,11 @@ def drift_one(mu,r_vec0, v_vec0, dt):
 #data['phi'].plot(x="time",ax=ax)
 #plt.savefig(os.path.join(os.pardir,"plots","resonance_angle.png"),dpi=300)
 #plt.close()
+def simulation(rhvec, vhvec, mu, Gmass, dt, tfinal):
+    noutput=tfinal/dt
+
+    for i in range(noutput):
+        step()
 
 
 #fig, ax = plt.subplots(figsize=(8,6))
@@ -267,11 +273,34 @@ def drift_one(mu,r_vec0, v_vec0, dt):
 
 
 if __name__=="__main__":
-    time=[]
-    dt = 5.5 * YR2S
-    xv2el(x_Neptune, y_Neptune, z_Neptune, vx_Neptune,vy_Neptune, vz_Neptune)
-    r_vec0=
-    v_vec0=
+    dt = 5.0 * YR2S
+    tfinal = 1e5 * YR2S
+    rhvec = np.empty((2,3))
+    vhvec = np.empty((2,3))
+    rhvec[0,:] = np.array([x_Neptune, y_Neptune, z_Neptune])
+    rhvec[1,:] = np.array([x_Pluto, y_Pluto, z_Pluto])
+    vhvec[0,:] = np.array([vx_Neptune, vy_Neptune, vz_Neptune])
+    vhvec[1,:] = np.array([vx_Pluto, vy_Pluto, vz_Pluto])
+    Gmass = np.array([G*m_Neptune, G*m_Pluto])
+    mu= Gmass + G*m_Sun
+    rhhist= [np.copy(rhvec)]
+    vhhist= [np.copy(vhvec)]
+
+    elem_Neptune = [np.array(xv2el(rhvec[0,0], rhvec[0,1], rhvec[0,2], vhvec[0,0], vhvec[0,1], vhvec[0,2]))]
+    elem_Pluto = [np.array(xv2el(rhvec[1,0], rhvec[1,1], rhvec[1,2], vhvec[1,0], vhvec[1,1], vhvec[1,2]))]
+    time = np.arange(start=0.0, stop =tfinal, step=dt)
+    vbvec = vh2vb(vhvec, mu, Gmass)
+    elem_Neptune = np.empty((len(time)+1, 9))
+    for t in time:
+
+        rhvec, vhvec=step(rhvec, vhvec, mu, Gmass, dt)
+        vhvec= vb2vh(vbvec, mu, Gmass)
+        elem_Neptune.append(xv2el(rhvec[0,0], rhvec[0,1], rhvec[0,2], vhvec[0,0], vhvec[0,1], vhvec[0,2]))
+        elem_Pluto.append(xv2el(rhvec[1,0], rhvec[1,1], rhvec[1,2], vhvec[1,0], vhvec[1,1], vhvec[1,2]))
+        rhhist.append([np.copy(rhvec)])
+        vhhist.append([np.copy(vhvec)])
+
+    #rhvec_new, vhvec_new = simulation(rhvec, vhvec, mu, Gmass, dt, tfinal)
     step(r_vec0, v_vec0, mu, Gmass, dt)
     plt.subplots(figsize=(8, 6))
     dE= E[-1]-E
