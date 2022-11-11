@@ -117,6 +117,7 @@ def vb2vh (vbvec, mu, Gmass):
 def Kep_drift (M,r_vec0,v_vec0,mu,dt):
     #Uses Kepler's equation for eccentric anomaly E
     # Equation 2.49 solve for E
+    #Treats n-body problem as 2-body for each body in system
     def Danby(M,ecc,accuracy=1E-14):
         E=[M]
         def f(E):
@@ -190,6 +191,7 @@ def kick (rhvec, vbvec, dt):
     #E_int step
     #uses the Hamiltonian for the interaction step
     #half-time step (solar drift/linear drift)
+    #force of gravity between 2 bodies that aren't sun
     def getacc_one(Gm, r_vec, i):
         #Gm: G*mass values of each body
         #rvec: cartesian position vectors
@@ -203,7 +205,7 @@ def kick (rhvec, vbvec, dt):
 
         return np.sum(dr_vec.T * irij3, axis=1)
 
-    n= rhvec.shape[]
+    n= rhvec.shape[0]
     acc = np.array([getacc_one(Gmass, rhvec, i)for i in range(n)])
     vbvec += acc * dt
     return vbvec
@@ -222,35 +224,28 @@ def step(rvec0,vvec0,mu,Gmass,dt):
     vvec= kick(rhvec, vbvec, dth)
     rvec, vvec= Sun_drift(Gmass, rhvec, vbvec, GMcb, dth)
     return rvec, vvec
-def drift_one(mu,r_vec0, v_vec0, dt):
+def calc_energy_one(vhvec, rhvec, Gmass, mu):
+    # Computes system energy at particular state of simulation
+    # rhvec: heliocentric position vectors of n bodies
+    # vhvec: heliocentric velocity vectors of n bodies
+    # Gmass: masses of n bodies in system
+    # mu: central body gravitational parameter
+    # vbvec,vbcb: from vh2vb
+    vbvec,vbcb= vh2vb(vhvec, mu, Gmass)
+    vbmag2 = np.einsum("ij,ij->i", vbvec, vbvec)
+    irh = 1.0 / np.linalg.norm(rhvec, axis=1)
+    ke = 0.5 * (mu * np.vdot(vbcb, vbcb) + np.sum(Gmass * vbmag2)) / G
 
+    def pe_one(Gm, r_vec, i): #Heart of integrator
+        drvec = r_vec[i + 1:, :] - r_vec[i, :]
+        irij = np.linalg.norm(drvec, axis=1)
+        irij = Gm[i + 1:] * Gm[i] / irij
+        return np.sum(drvec.T * irij, axis=1)
 
-    #inputs cartesian coordinates
+    n = rhvec.shape[0]
+    pe = (-mu * np.sum(Gmass * irh) - np.sum([pe_one(Gmass.flatten(), rhvec, i) for i in range(n - 1)])) / G
 
-    #Outputs new position and velocity cartesian coordinates
-
-    def calc_energy_one(vhvec, rhvec, Gmass, mu):
-        # Computes system energy at particular state of simulation
-        # rhvec: heliocentric position vectors of n bodies
-        # vhvec: heliocentric velocity vectors of n bodies
-        # Gmass: masses of n bodies in system
-        # mu: central body gravitational parameter
-        # vbvec,vbcb: from vh2vb
-        vbvec,vbcb= vh2vb(vhvec, mu, Gmass)
-        vbmag2 = np.einsum("ij,ij->i", vbvec, vbvec)
-        irh = 1.0 / np.linalg.norm(rhvec, axis=1)
-        ke = 0.5 * (mu * np.vdot(vbcb, vbcb) + np.sum(Gmass * vbmag2)) / G
-
-        def pe_one(Gm, r_vec, i):
-            drvec = r_vec[i + 1:, :] - r_vec[i, :]
-            irij = np.linalg.norm(drvec, axis=1)
-            irij = Gm[i + 1:] * Gm[i] / irij
-            return np.sum(drvec.T * irij, axis=1)
-
-        n = rhvec.shape[0]
-        pe = (-mu * np.sum(Gmass * irh) - np.sum([pe_one(Gmass.flatten(), rhvec, i) for i in range(n - 1)])) / G
-
-        return ke + pe
+    return ke + pe
 
 
 #Make plots from help, make own using matplotlib
@@ -305,7 +300,8 @@ if __name__=="__main__":
 
     plt.subplots(figsize=(8, 6))
     dE= E[-1]-E
-    E0=
+    M_Neptune= elem_Neptune[7]
+    M_Pluto = elem_Pluto[7]
 
     y_values = dE / E0
     x_values = [time]
