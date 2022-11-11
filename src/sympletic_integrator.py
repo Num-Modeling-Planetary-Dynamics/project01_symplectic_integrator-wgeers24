@@ -282,11 +282,16 @@ if __name__=="__main__":
     rhhist= [np.copy(rhvec)]
     vhhist= [np.copy(vhvec)]
 
+    Energy=[]
+    res_angle=[]
+
     elem_Neptune = [np.array(xv2el(rhvec[0,0], rhvec[0,1], rhvec[0,2], vhvec[0,0], vhvec[0,1], vhvec[0,2]))]
     elem_Pluto = [np.array(xv2el(rhvec[1,0], rhvec[1,1], rhvec[1,2], vhvec[1,0], vhvec[1,1], vhvec[1,2]))]
     time = np.arange(start=0.0, stop =tfinal, step=dt)
     vbvec = vh2vb(vhvec, mu, Gmass)
     elem_Neptune = np.empty((len(time)+1, 9))
+
+
     for t in time:
 
         rhvec, vhvec=step(rhvec, vhvec, mu, Gmass, dt)
@@ -295,15 +300,17 @@ if __name__=="__main__":
         elem_Pluto.append(xv2el(rhvec[1,0], rhvec[1,1], rhvec[1,2], vhvec[1,0], vhvec[1,1], vhvec[1,2]))
         rhhist.append([np.copy(rhvec)])
         vhhist.append([np.copy(vhvec)])
-
+        Energy.append(calc_energy_one(vhvec, rhvec, Gmass, mu))
+        res = 3 * elem_Pluto[1, 8] - 2 * elem_Neptune[0, 8] - elem_Pluto[1, 5]
+        res_angle.append(res)
     #rhvec_new, vhvec_new = simulation(rhvec, vhvec, mu, Gmass, dt, tfinal)
 
     plt.subplots(figsize=(8, 6))
-    dE= E[-1]-E
+    dEnergy= Energy[-1]-Energy[0]
     M_Neptune= elem_Neptune[7]
     M_Pluto = elem_Pluto[7]
 
-    y_values = dE / E0
+    y_values = dEnergy / Energy[0]
     x_values = [time]
     plt.plot(x_values, y_values)
     plt.ylabel('Change in Energy')
@@ -312,6 +319,7 @@ if __name__=="__main__":
     plt.savefig('Delta_Energy.pdf')
     # Plot of resonance angle vs time
     plt.subplots(figsize=(8, 6))
+    res_angle=
     y_values = res_angle
     x_values = [time]
     plt.plot(x_values, y_values)
