@@ -274,7 +274,7 @@ if __name__=="__main__":
     v_vec0=
     step(r_vec0, v_vec0, mu, Gmass, dt)
     plt.subplots(figsize=(8, 6))
-    dE=
+    dE= E[-1]-E
     E0=
 
     y_values = dE / E0
