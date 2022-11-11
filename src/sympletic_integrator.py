@@ -301,7 +301,7 @@ if __name__=="__main__":
         vhhist.append([np.copy(vhvec)])
 
     #rhvec_new, vhvec_new = simulation(rhvec, vhvec, mu, Gmass, dt, tfinal)
-    step(r_vec0, v_vec0, mu, Gmass, dt)
+
     plt.subplots(figsize=(8, 6))
     dE= E[-1]-E
     E0=
