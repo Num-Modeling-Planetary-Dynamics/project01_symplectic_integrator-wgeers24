@@ -214,7 +214,7 @@ def Sun_drift(Gmass,rhvec,vbvec,GMcb,dt):
     pt = np.sum(Gmass *vbvec, axis=0) / GMcb
     rhvec += pt*dt
 
-def step(rvec0,vvec0,mu,Gmass,dt):
+def step(M,rvec0,vvec0,mu,Gmass,dt):
     #Advances simulation by dt
     #Use dt as 5
     dth=0.5*dt
@@ -285,7 +285,7 @@ if __name__=="__main__":
     Energy=[]
     res_angle=[]
 
-    elem_Neptune = [np.array(xv2el(,rhvec[0,0], rhvec[0,1], rhvec[0,2], vhvec[0,0], vhvec[0,1], vhvec[0,2]))]
+    elem_Neptune = [np.array(xv2el(mu,rhvec[0,0], rhvec[0,1], rhvec[0,2], vhvec[0,0], vhvec[0,1], vhvec[0,2]))]
     elem_Pluto = [np.array(xv2el(rhvec[1,0], rhvec[1,1], rhvec[1,2], vhvec[1,0], vhvec[1,1], vhvec[1,2]))]
     time = np.arange(start=0.0, stop =tfinal, step=dt)
     vbvec = vh2vb(vhvec, mu, Gmass)
