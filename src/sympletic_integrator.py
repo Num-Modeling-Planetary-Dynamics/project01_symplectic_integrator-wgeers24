@@ -12,7 +12,7 @@ G= 6.6743E-11
 m_Sun=1.9885E+30
 m_Neptune= 102.409E+24
 m_Pluto= 1.307E+22
-m_planet=np.array(m_Neptune, m_Pluto)
+m_planet=np.array[(m_Neptune, m_Pluto)]
 mu=G*(m_Sun+m_planet)
 Gmass=m_Neptune + m_Pluto
 Gm= Gmass*G
@@ -285,7 +285,7 @@ if __name__=="__main__":
     Energy=[]
     res_angle=[]
 
-    elem_Neptune = [np.array(xv2el(rhvec[0,0], rhvec[0,1], rhvec[0,2], vhvec[0,0], vhvec[0,1], vhvec[0,2]))]
+    elem_Neptune = [np.array(xv2el(,rhvec[0,0], rhvec[0,1], rhvec[0,2], vhvec[0,0], vhvec[0,1], vhvec[0,2]))]
     elem_Pluto = [np.array(xv2el(rhvec[1,0], rhvec[1,1], rhvec[1,2], vhvec[1,0], vhvec[1,1], vhvec[1,2]))]
     time = np.arange(start=0.0, stop =tfinal, step=dt)
     vbvec = vh2vb(vhvec, mu, Gmass)
@@ -319,7 +319,6 @@ if __name__=="__main__":
     plt.savefig('Delta_Energy.pdf')
     # Plot of resonance angle vs time
     plt.subplots(figsize=(8, 6))
-    res_angle=
     y_values = res_angle
     x_values = [time]
     plt.plot(x_values, y_values)
