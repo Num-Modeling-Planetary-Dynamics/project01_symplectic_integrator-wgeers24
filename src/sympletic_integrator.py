@@ -12,10 +12,6 @@ G= 6.6743E-11
 m_Sun=1.9885E+30
 m_Neptune= 102.409E+24
 m_Pluto= 1.307E+22
-m_planet=np.array[(m_Neptune, m_Pluto)]
-mu=G*(m_Sun+m_planet)
-Gmass=m_Neptune + m_Pluto
-Gm= Gmass*G
 GMcb= G*m_Sun
 JD2S=86400
 YR2S=np.longdouble(365.25*JD2S)
@@ -92,8 +88,8 @@ def xv2el (mu,x,y,z,vx,vy,vz):
 
 def vh2vb (vhvec, mu, Gmass):
     #Converts heliocentric velocity vector to barycentric
-    Gmtot= mu + np.sum(Gmass)
-    vbcb = -np.sum(Gmass* vhvec,axis=0)/Gmtot
+    Gmtot= GMcb + np.sum(Gmass)
+    vbcb = -np.sum(Gmass * vhvec.T,axis=1)/Gmtot
     vbvec= vhvec + vbcb
     #vhvec: heliocentric velocity vectors of all n bodies
     #Gmass: masses of n bodies in system
@@ -286,7 +282,7 @@ if __name__=="__main__":
     res_angle=[]
 
     elem_Neptune = [np.array(xv2el(mu,rhvec[0,0], rhvec[0,1], rhvec[0,2], vhvec[0,0], vhvec[0,1], vhvec[0,2]))]
-    elem_Pluto = [np.array(xv2el(rhvec[1,0], rhvec[1,1], rhvec[1,2], vhvec[1,0], vhvec[1,1], vhvec[1,2]))]
+    elem_Pluto = [np.array(xv2el(mu,rhvec[1,0], rhvec[1,1], rhvec[1,2], vhvec[1,0], vhvec[1,1], vhvec[1,2]))]
     time = np.arange(start=0.0, stop =tfinal, step=dt)
     vbvec = vh2vb(vhvec, mu, Gmass)
     elem_Neptune = np.empty((len(time)+1, 9))
@@ -294,7 +290,7 @@ if __name__=="__main__":
 
     for t in time:
 
-        rhvec, vhvec=step(rhvec, vhvec, mu, Gmass, dt)
+        rhvec, vhvec=step(M,rhvec, vhvec, mu, Gmass, dt)
         vhvec= vb2vh(vbvec, mu, Gmass)
         elem_Neptune.append(xv2el(rhvec[0,0], rhvec[0,1], rhvec[0,2], vhvec[0,0], vhvec[0,1], vhvec[0,2]))
         elem_Pluto.append(xv2el(rhvec[1,0], rhvec[1,1], rhvec[1,2], vhvec[1,0], vhvec[1,1], vhvec[1,2]))
@@ -320,7 +316,7 @@ if __name__=="__main__":
     # Plot of resonance angle vs time
     plt.subplots(figsize=(8, 6))
     y_values = res_angle
-    x_values = [time]
+    x_values = time
     plt.plot(x_values, y_values)
     plt.ylabel('Resonance angle')
     plt.xlabel('Time')
